@@ -25,7 +25,7 @@ renderer.code = (code, language) => {
 };
 renderer.image = (href, title, text) => {
     let src = href;
-    if (href.indexOf('/assets/images/') === 0) {
+    if (href.indexOf('/assets/') === 0) {
         src = `http://localhost:${PORT}${href}`;
     }
     return `<img src="${src}" alt="${text}">`;
@@ -42,7 +42,7 @@ async function listPosts() {
     return files.map(file => file.slice(0, -3));
 }
 
-async function readImage(path) {
+async function readAsset(path) {
     return readFile(`${REPOSITORY_PATH}${path}`);
 }
 
@@ -63,17 +63,18 @@ const server = micro(async (req, res) => {
         return send(res, 200, await listPosts());
     }
 
-    if (req.url.indexOf('/assets/images/') === 0) {
+    if (req.url.indexOf('/assets/') === 0) {
         const slug = req.url;
         const extension = req.url.split('.').pop();
         const types = {
             gif: 'image/gif',
             jpg: 'image/jpeg',
             // mp4: 'video/mp4',
+            pdf: 'application/pdf',
             png: 'image/png',
         };
         res.setHeader('Content-Type', types[extension]);
-        return send(res, 200, await readImage(slug));
+        return send(res, 200, await readAsset(slug));
     }
 
     if (req.url.indexOf('/posts/') === 0) {
@@ -81,7 +82,7 @@ const server = micro(async (req, res) => {
         return send(res, 200, await readPost(slug));
     }
 
-    send(res, 200, 'Valid endpoints are `/posts`, `/posts/:slug` and `/assets/images/:path`.');
+    send(res, 200, 'Valid endpoints are `/posts`, `/posts/:slug` and `/assets/:path`.');
 });
 
 module.exports = cloneGitHubRepository()
