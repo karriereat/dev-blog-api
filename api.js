@@ -57,13 +57,23 @@ const server = micro(async (req, res) => {
 
     if (req.url.indexOf('/assets/images/') === 0) {
         const slug = req.url;
-        send(res, 200, await readImage(slug));
+        const extension = req.url.split('.').pop();
+        if (extension === 'jpg') {
+            res.setHeader('Content-Type', 'image/jpeg');
+        } else if (extension === 'gif') {
+            res.setHeader('Content-Type', 'image/gif');
+        } else if (extension === 'png') {
+            res.setHeader('Content-Type', 'image/png');
+        }
+        return send(res, 200, await readImage(slug));
     }
 
     if (req.url.indexOf('/posts/') === 0) {
         const slug = req.url.split('/')[2];
-        send(res, 200, await readPost(slug));
+        return send(res, 200, await readPost(slug));
     }
+
+    send(res, 200, 'Valid endpoints are `/posts`, `/posts/:slug` and `/assets/images/:path`.');
 });
 
 module.exports = cloneGitHubRepository()
