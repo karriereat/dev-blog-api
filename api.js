@@ -66,13 +66,13 @@ const server = micro(async (req, res) => {
     if (req.url.indexOf('/assets/images/') === 0) {
         const slug = req.url;
         const extension = req.url.split('.').pop();
-        if (extension === 'jpg') {
-            res.setHeader('Content-Type', 'image/jpeg');
-        } else if (extension === 'gif') {
-            res.setHeader('Content-Type', 'image/gif');
-        } else if (extension === 'png') {
-            res.setHeader('Content-Type', 'image/png');
-        }
+        const types = {
+            gif: 'image/gif',
+            jpg: 'image/jpeg',
+            // mp4: 'video/mp4',
+            png: 'image/png',
+        };
+        res.setHeader('Content-Type', types[extension]);
         return send(res, 200, await readImage(slug));
     }
 
