@@ -13,6 +13,7 @@ const readDirectory = pify(fs.readdir);
 const readFile = pify(fs.readFile);
 const { send } = micro;
 
+const PORT = process.env.PORT || 4000;
 const REPOSITORY_URL = 'https://github.com/karriereat/dev-blog.git';
 const REPOSITORY_PATH = resolve(process.cwd(), 'repository');
 
@@ -21,6 +22,13 @@ renderer.code = (code, language) => {
     const validLang = !!(language && highlightjs.getLanguage(language));
     const highlighted = validLang ? highlightjs.highlight(language, code).value : code;
     return `<pre><code class="hljs ${language}">${highlighted}</code></pre>`;
+};
+renderer.image = (href, title, text) => {
+    let src = href;
+    if (href.indexOf('/assets/images/') === 0) {
+        src = `http://localhost:${PORT}${href}`;
+    }
+    return `<img src="${src}" alt="${text}">`;
 };
 marked.setOptions({ renderer });
 
@@ -78,8 +86,7 @@ const server = micro(async (req, res) => {
 
 module.exports = cloneGitHubRepository()
     .then(() => {
-        const port = process.env.PORT || 4000;
-        server.listen(port);
-        console.log(`Server listening on localhost:${port}`);
+        server.listen(PORT);
+        console.log(`Server listening on localhost:${PORT}`);
         return server;
     });
